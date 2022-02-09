@@ -24,6 +24,14 @@ For example, a contract can have ownership of a particular NFT, and allow borrow
 
 Apps and people can support non-custodial lending by simply using `getVirtualOwner(tokenId)` instead of `getOwner(tokenId)` to obtain the address of the current virtual owner.  
 
+## Build and run tests
+### Prerequisites
+You need to have [Foundry](https://github.com/gakonst/foundry) installed.
+
+### Steps
+1. Get dependencies and build contracts - `forge build`
+2. Run unit tests with fuzzing - `forge test`
+
 ## Contracts
 ### LendWrapper.sol
 A wrapper around a specific ERC-721 contract. Ownership token represents virtual ownership of the underlying token.
