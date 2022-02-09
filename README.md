@@ -1,31 +1,40 @@
-# nft-lend
+# Non-custodial NFT lending via pseudo-ownership
+## Warning
+The code in this repository is unaudited and is probably unsafe for use. Reference with care.
 
+## Rational
+NFTs can represent a wide variety of ownership of things. For example, a community membership, a perpetual ticket, real estate. 
+And depending on how different parties use these NFTs, they can be used to enable event entry, right to enter raffles, showcase at various events.
+
+An owner of an NFT may not be able to attend all events or enjoy all its benefits. 
+As the number of use cases of NFTs grow, parties will begin to be interested in renting/lending out their NFTs to buyers and friends.
+For example, if an owner happens to be out of the country for a particular party that requires NFT ownership, they could rent out their NFT for a day to allow someone else to attend the party instead.
+
+## Overview
 There are different types of NFT lending for different use cases, some mimic real-estate renting, some are backed by collateral.
-What this project aims to provide is a building block for non-custodial lending. The borrower is never in full custody of the actual token. Hence, the lender's NFT is safu and the borrower can't run away with it. 
-Instead, the token is sent to the Wrapper contract, and the contract provides an interface for services to check who has virtual custody of that token at the current moment. Virtual custody of the token can be traded as the wrapper contract is an ERC-721.
+What this project aims to provide is a building block for non-custodial lending of ERC-721 by introducing the concept of virtual ownership. 
+This arrangement has the following properties:
+* The borrower can never run away with the actual token.
+* The lending period has a deadline. After which, virtual ownership belongs to the lender again.
+* There can only be 1 virtual owner at any given time.
+* The virtual custody can be transferred as it is implemented as an ERC-721.
+
+Payment mechanisms for renting purposes are out of scope, but it is possible to on build on top of this mechanism.
+For example, a contract can have ownership of a particular NFT, and allow borrowers to initiate the lending mechanism for a given duration, only if payment was made.
+
+Apps and people can support non-custodial lending by simply using `getVirtualOwner(tokenId)` instead of `getOwner(tokenId)` to obtain the address of the current virtual owner.  
 
 ## Contracts
-### ERC721Lender.sol
-Primary interface for lending. This tracks a list of addresses and associates them with underlying LendWrappers. It works a little like an ERC-1155, and provides a central lookup to a correct wrapper address for given ERC-721s.
-* Allow users to lend out their ERC-721s
-* Allow services to look up current 'owner' of NFTs given the ERC-721 address and/or token-id
-* Allow users to lookup the wrapper contract associated with the original ERC-721, in order to lookup more information like lending duration
-
-### ERC721LendWrapper.sol
-A wrapper around an ERC-721 that is an ERC-721. This token represents virtual custody of the underlying token.
-* Each Wrapper is associated with a particular ERC-721 token.
+### LendWrapper.sol
+A wrapper around a specific ERC-721 contract. Ownership token represents virtual ownership of the underlying token.
+* Each Wrapper is associated with a specific ERC-721 token.
 * A Wrapper token can only be minted to a target by depositing the associated ERC-721 token, with a specified lending duration.
   * The token-id will be the same as the wrapped token's token-id.
 * The Wrapper token can be transferred from one person to another like a normal ERC-721 token.
 * While the wrapper token exists and lending is active, `getVirtualOwner(tokenId)` function will reflect ownership as
   * token borrower, if lending is active
   * token lender, if lending is no longer active
-  * actual token owner, if token id is not in contract
-* The wrapper token may be burnt to return the underlying token collector
-  * By anyone after lending duration is over, by calling `collect`
-  * By borrower at any time
-
-## Deployed Contract(s)
-| Network | Type | Address |
-| --- | --- | --- |
-| Ropsten Network | Lender | 0x1e83B1EB6C549353bdc9659737fEc6Ac5Fc500c0 |
+  * the result from `tokenOwner.getVirtualOwner(tokenId)`, if actual tokenOwner is a contract supports the interface and is not this contract
+    * actual token owner, if tokenOwner does not support this interface
+* The wrapper token may be burnt to return the underlying token to its original owner
+  * By anyone after lending duration is over, by calling `collect()`
