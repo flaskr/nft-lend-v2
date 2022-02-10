@@ -1,6 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.11;
 
+/**
+    @notice ERC165 signature of ILendWrapper is `0x48bbd5ac`. This was the function used:
+    `
+    function calculateSelector() public pure returns (bytes4) {
+        ILendWrapper i;
+        return i.underlyingToken.selector ^ i.lendOut.selector
+        ^ i.canBeCollected.selector ^ i.terminateLending.selector
+        ^ i.collect.selector ^ i.virtualOwnerOf.selector
+        ^ i.virtualOwnerAtTime.selector;
+    }`
+*/
 interface ILendWrapper {
     /// @notice Returns the token address of the underlying token address
     function underlyingToken() external view returns (address);

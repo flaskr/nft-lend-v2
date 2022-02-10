@@ -5,6 +5,7 @@ import "solmate/tokens/ERC721.sol";
 import "./interfaces/ILendWrapper.sol";
 import "./interfaces/IERC721.sol";
 import "./interfaces/IERC721Receiver.sol";
+import "./interfaces/IERC165.sol";
 
 contract LendWrapper is ERC721, ILendWrapper, IERC721Receiver {
 
@@ -56,6 +57,17 @@ contract LendWrapper is ERC721, ILendWrapper, IERC721Receiver {
         return virtualOwnerAtTime(_tokenId, block.timestamp);
     }
 
+    // @notice Used to get the address of an unmanaged NFT, supports looking up other ILendWrappers.
+    function getOwnerOfUnmanagedNFT(uint256 _tokenId) internal view returns (address) {
+        address nftDirectOwner = wrappedToken.ownerOf(_tokenId);
+        if (isContract(nftDirectOwner)) {
+            if (IERC165(nftDirectOwner).supportsInterface(0x48bbd5ac)) { // Check for ILendWrapper interface
+                return ILendWrapper(nftDirectOwner).virtualOwnerOf(_tokenId);
+            }
+        }
+        return nftDirectOwner;
+    }
+
     function virtualOwnerAtTime(uint256 _tokenId, uint256 _timeToCheck) public view returns (address) {
         if (originalOwner[_tokenId] != address(0)) { // This means that the tokenId is managed by this contract
             LendingDuration memory duration = lendingDurations[_tokenId];
@@ -67,7 +79,7 @@ contract LendWrapper is ERC721, ILendWrapper, IERC721Receiver {
                 return originalOwner[_tokenId]; // orignal owner of the wrapped NFT
             }
         } else {
-            return wrappedToken.ownerOf(_tokenId); // unmanaged NFT - return owner as informed by the wrapped NFT
+            return getOwnerOfUnmanagedNFT(_tokenId); // unmanaged NFT - return owner as informed by the wrapped NFT
         }
     }
 
@@ -125,5 +137,19 @@ contract LendWrapper is ERC721, ILendWrapper, IERC721Receiver {
     ) external override returns (bytes4) {
         require(msg.sender == address(wrappedToken), "Only supports wrapped");
         return IERC721Receiver(operator).onERC721Received.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceID) public pure override returns (bool) {
+        return
+            interfaceID == 0x01ffc9a7 || // ERC165 Interface ID for ERC165
+            interfaceID == 0x80ac58cd || // ERC165 Interface ID for ERC721
+            interfaceID == 0x5b5e139f || // ERC165 Interface ID for ERC721Metadata
+            interfaceID == 0x48bbd5ac; // ERC165 Interface ID for ILendWrapper
+    }
+
+    function isContract(address addr) private view returns (bool) {
+        uint size;
+        assembly { size := extcodesize(addr) }
+        return size > 0;
     }
 }

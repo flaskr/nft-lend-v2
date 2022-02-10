@@ -68,8 +68,17 @@ contract LendWrapperTest is DSTest {
         assertEq(owner, lendWrapper.virtualOwnerOf(0));
     }
 
-    // TODO: Add support later
-    function testAbleToObtainVirtualOwnerOfAnotherLendWrapper() public {}
+    function testAbleToObtainVirtualOwnerOfAnotherLendWrapper() public {
+        // Create another lendWrapper
+        LendWrapper anotherLendWrapper = new LendWrapper(address(nft), "wTEST2", "wTEST2");
+        nft.approve(address(anotherLendWrapper), 0);
+        cheats.warp(1000);
+
+        anotherLendWrapper.lendOut(0, user1, block.timestamp, 1 days);
+        assertEq(address(anotherLendWrapper), nft.ownerOf(0));
+        assertEq(user1, anotherLendWrapper.virtualOwnerOf(0));
+        assertEq(user1, lendWrapper.virtualOwnerOf(0));
+    }
 
     function testFailLendingForZeroDuration() public {
         lendWrapper.lendOut(0, user1, block.timestamp, 0);
