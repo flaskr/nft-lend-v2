@@ -2,6 +2,8 @@
 ## Warning
 The code in this repository is unaudited and is probably unsafe for use. Reference with care.
 
+This proposed standard is likely to conform to the interface proposed by [this discussion](https://ethereum-magicians.org/t/erc-standard-for-held-non-fungible-token-nfts-defi/7117), to support an even wider variety of pseudo-ownership.
+
 ## Rational
 NFTs can represent a wide variety of ownership of things. For example, a community membership, a perpetual ticket, real estate. 
 And depending on how different parties use these NFTs, they can be used to enable event entry, right to enter raffles, showcase at various events.
