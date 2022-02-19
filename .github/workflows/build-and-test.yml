@@ -7,7 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: crytic/slither-action@v0.1.0
   check:
-    name: Foundry project
+    name: Build & Test Contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
