@@ -81,10 +81,9 @@ contract LendWrapperTest is DSTest {
         lendWrapper.lendOut(0, user1, block.timestamp, 0);
     }
 
-    function testFailCreationOfExpiredLending(uint _divisor) public {
-        uint nonZeroDivisor = 2 + (_divisor % 100);
-        uint startTime = block.timestamp / nonZeroDivisor;
-        lendWrapper.lendOut(0, user1, startTime, 1);
+    function testFailCreationOfExpiredLending() public {
+        cheats.warp(100000);
+        lendWrapper.lendOut(0, user1, 100, 1);
     }
 
     function testVirtualOwnerCanBeTransferredWhileLendingIsActive(uint _randDuration) public {
