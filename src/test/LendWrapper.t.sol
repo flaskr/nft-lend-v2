@@ -92,7 +92,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testVirtualOwnerCanBeTransferredWhileLendingIsActive(uint _randDuration) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = (_randDuration % 1000) + 1;
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
 
