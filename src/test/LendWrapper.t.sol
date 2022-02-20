@@ -46,23 +46,20 @@ contract LendWrapperTest is DSTest {
         assertEq(owner, lendWrapper.virtualOwnerAtTime(0, block.timestamp));
     }
 
-    function testLendOutToken(uint256 _randDuration, uint256 _randTimeAfterExpiry) public {
-        uint nonZeroDuration = (_randDuration) % 1000 + 100;
+    function testLendOutToken(uint256 _randDuration) public {
+        uint nonZeroDuration = _nonZeroDuration(_randDuration) + 2;
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
-
-        uint nonExpiringWaitTime = nonZeroDuration / 2; // wait for half of the lending duration
-        cheats.warp(block.timestamp + nonExpiringWaitTime); // wait for part of the lending duration, such that lending is still active
 
         assertEq(address(lendWrapper), nft.ownerOf(0));
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
         assertEq(user1, lendWrapper.virtualOwnerAtTime(0, block.timestamp));
-        uint timeAfterExpiry = block.timestamp + _randDuration;
+        uint timeAfterExpiry = block.timestamp + nonZeroDuration + 2;
         assertEq(owner, lendWrapper.virtualOwnerAtTime(0, timeAfterExpiry));
     }
 
     function testVirtualOwnerIsOriginalOwnerBeforeLendingIsActive(uint _randDuration) public {
         uint futureStartTime = block.timestamp + (_randDuration) % 1000 + 1;
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, futureStartTime, nonZeroDuration);
         assertEq(address(lendWrapper), nft.ownerOf(0));
         assertEq(owner, lendWrapper.virtualOwnerOf(0));
@@ -84,15 +81,14 @@ contract LendWrapperTest is DSTest {
         lendWrapper.lendOut(0, user1, block.timestamp, 0);
     }
 
-    function testFailCreationOfExpiredLending(uint _divisor, uint _randDuration) public {
-        uint nonZeroDivisor = (_divisor % 100) + 2;
+    function testFailCreationOfExpiredLending(uint _divisor) public {
+        uint nonZeroDivisor = 2 + (_divisor % 100);
         uint startTime = block.timestamp / nonZeroDivisor;
-        uint nonZeroDuration = _randDuration % (block.timestamp - startTime);
-        lendWrapper.lendOut(0, user1, startTime, nonZeroDuration);
+        lendWrapper.lendOut(0, user1, startTime, 1);
     }
 
     function testVirtualOwnerCanBeTransferredWhileLendingIsActive(uint _randDuration) public {
-        uint nonZeroDuration = (_randDuration % 1000) + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
 
@@ -102,7 +98,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testVirtualOwnerIsOriginalOwnerAfterLendingIsExpired(uint _randDuration, uint _randTimeAfterExpiry) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
         uint timeAfterExpiry = block.timestamp + nonZeroDuration + 1 + _randTimeAfterExpiry % 10000;
@@ -111,13 +107,13 @@ contract LendWrapperTest is DSTest {
     }
 
     function testFailOwnerCollectWrappedWhileLendingIsNotExpired(uint _randDuration) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         lendWrapper.collect(0);
     }
 
     function testOwnerCanCollectWrappedAfterLendingExpires(uint _randDuration, uint _randTimeAfterExpiry) public {
-        uint nonZeroDuration = _randDuration / 2 == 0 ? 1 : _randDuration / 2;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assert(!lendWrapper.canBeCollected(0));
 
@@ -130,7 +126,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testFailNonVirtualOwnerTerminateLending(uint _randDuration) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assert(!lendWrapper.canBeCollected(0));
 
@@ -139,7 +135,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testVirtualOwnerCanPrematurelyTerminateLending(uint _randDuration) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _nonZeroDuration(_randDuration);
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assert(!lendWrapper.canBeCollected(0));
 
@@ -150,5 +146,9 @@ contract LendWrapperTest is DSTest {
         lendWrapper.collect(0);
         assertEq(owner, lendWrapper.virtualOwnerOf(0));
         assertEq(owner, nft.ownerOf(0));
+    }
+
+    function _nonZeroDuration(uint num) internal returns (uint256){
+        return num / 2 == 0 ? 1 : num / 2;
     }
 }
