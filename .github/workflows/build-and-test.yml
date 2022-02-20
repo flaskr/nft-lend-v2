@@ -14,13 +14,26 @@ jobs:
           version: nightly
       - name: Run tests
         run: forge test -vvv
-      - name: Run Slither
-        uses: crytic/slither-action@v0.1.0
-        continue-on-error: true
-        id: slither
-        with:
-          ignore-compile: true
-          target: 'src/'
-          solc-version: "0.8.11"
+#      - name: Run Slither
+#        uses: crytic/slither-action@v0.1.0
+#        continue-on-error: true
+#        id: slither
+#        with:
+#          ignore-compile: true
+#          target: 'src/'
+#          solc-version: "0.8.11"
 #          node-version: 16
 #          sarif: results.sarif
+
+      # Setup Python
+      - name: Setup Python
+        id: setup-python
+        uses: actions/setup-python@v2
+      - name: Install Slither
+        if: steps.python-cache.outputs.cache-hit != 'true'
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install slither-analyzer
+      - name: slither-analyzer
+        run: |
+          slither . --ignore-compile --disable-color --print human-summary || true
