@@ -21,3 +21,12 @@ jobs:
           version: nightly
       - name: Run tests
         run: forge test -vvv
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          ignore-compile: true
+#          target: 'src/'
+#          node-version: 16
+#          sarif: results.sarif
