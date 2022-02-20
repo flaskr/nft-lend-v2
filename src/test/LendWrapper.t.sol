@@ -117,7 +117,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testOwnerCanCollectWrappedAfterLendingExpires(uint _randDuration, uint _randTimeAfterExpiry) public {
-        uint nonZeroDuration = _randDuration + 1;
+        uint nonZeroDuration = _randDuration / 2 == 0 ? 1 : _randDuration / 2;
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assert(!lendWrapper.canBeCollected(0));
 
