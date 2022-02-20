@@ -47,7 +47,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testLendOutToken(uint256 _randDuration, uint256 _randWaitTime, uint256 _randTimeAfterExpiry) public {
-        uint nonZeroDuration = ((_randDuration) % 1000 + 1) * 1 days;
+        uint nonZeroDuration = (_randDuration) % 1000 + 1;
         uint timeAfterExpiry = block.timestamp + nonZeroDuration + 1 + _randTimeAfterExpiry;
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
 
@@ -61,7 +61,7 @@ contract LendWrapperTest is DSTest {
     }
 
     function testVirtualOwnerIsOriginalOwnerBeforeLendingIsActive(uint _randDays, uint _randDuration) public {
-        uint futureStartTime = ((_randDuration) % 1000 + 1) * 1 days;
+        uint futureStartTime = (_randDuration) % 1000 + 1;
         uint nonZeroDuration = _randDuration + 1;
         lendWrapper.lendOut(0, user1, futureStartTime, nonZeroDuration);
         assertEq(address(lendWrapper), nft.ownerOf(0));
