@@ -15,42 +15,14 @@ jobs:
       - name: Run tests
         run: forge test -vvv
 
-      # Install solc
-      - name: add repo
-          - run: sudo add-apt-repository ppa:ethereum/ethereum
-      - name: update repo
-          - run: sudo apt-get update
-      - name: install solc
-          - run: sudo apt-get install solc
-#      - name: Run Slither
-#        uses: crytic/slither-action@v0.1.0
-#        continue-on-error: true
-#        id: slither
-#        with:
-#          ignore-compile: true
-#          target: 'src/'
-#          solc-version: "0.8.11"
-#          node-version: 16
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          ignore-compile: true
+          target: 'src/'
+          solc-version: "0.8.7"
+          node-version: 16
 #          sarif: results.sarif
 
-      # Setup Python
-      - name: Setup Python
-        id: setup-python
-        uses: actions/setup-python@v2
-
-      # Cache PIP
-      - name: Cache PIP
-        id: python-cache
-        uses: actions/cache@v2
-        with:
-          path: ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('Pipfile.lock') }}
-
-      - name: Install Slither
-        if: steps.python-cache.outputs.cache-hit != 'true'
-        run: |
-          python3 -m pip install --upgrade pip
-          pip install slither-analyzer
-      - name: slither-analyzer
-        run: |
-          slither src/ --ignore-compile --disable-color --print human-summary || true
