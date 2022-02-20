@@ -46,22 +46,22 @@ contract LendWrapperTest is DSTest {
         assertEq(owner, lendWrapper.virtualOwnerAtTime(0, block.timestamp));
     }
 
-    function testLendOutToken(uint256 _randDuration, uint256 _randWaitTime, uint256 _randTimeAfterExpiry) public {
-        uint nonZeroDuration = (_randDuration) % 1000 + 1;
-        uint timeAfterExpiry = block.timestamp + nonZeroDuration + 1 + _randTimeAfterExpiry;
+    function testLendOutToken(uint256 _randDuration, uint256 _randTimeAfterExpiry) public {
+        uint nonZeroDuration = (_randDuration) % 1000 + 100;
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
 
-        uint nonExpiringWaitTime = nonZeroDuration / (_randWaitTime % 10 + 1); // wait for part of the lending duration, such that lending is still active
-        cheats.warp(nonExpiringWaitTime); // wait for part of the lending duration, such that lending is still active
+        uint nonExpiringWaitTime = nonZeroDuration / 2; // wait for half of the lending duration
+        cheats.warp(block.timestamp + nonExpiringWaitTime); // wait for part of the lending duration, such that lending is still active
 
         assertEq(address(lendWrapper), nft.ownerOf(0));
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
         assertEq(user1, lendWrapper.virtualOwnerAtTime(0, block.timestamp));
+        uint timeAfterExpiry = block.timestamp + _randDuration;
         assertEq(owner, lendWrapper.virtualOwnerAtTime(0, timeAfterExpiry));
     }
 
-    function testVirtualOwnerIsOriginalOwnerBeforeLendingIsActive(uint _randDays, uint _randDuration) public {
-        uint futureStartTime = (_randDuration) % 1000 + 1;
+    function testVirtualOwnerIsOriginalOwnerBeforeLendingIsActive(uint _randDuration) public {
+        uint futureStartTime = block.timestamp + (_randDuration) % 1000 + 1;
         uint nonZeroDuration = _randDuration + 1;
         lendWrapper.lendOut(0, user1, futureStartTime, nonZeroDuration);
         assertEq(address(lendWrapper), nft.ownerOf(0));
