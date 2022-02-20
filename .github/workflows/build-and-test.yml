@@ -36,4 +36,4 @@ jobs:
           pip install slither-analyzer
       - name: slither-analyzer
         run: |
-          slither . --ignore-compile --disable-color --print human-summary || true
+          slither src/ --ignore-compile --disable-color --print human-summary || true
