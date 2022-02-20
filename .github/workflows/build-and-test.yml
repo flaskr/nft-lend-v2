@@ -1,13 +1,6 @@
 name: Build and Test Contracts
 on: [push]
 jobs:
-#  analyze:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: crytic/slither-action@v0.1.0
-#        with:
-#          target: 'src/'
   check:
     name: Build & Test Contracts
     runs-on: ubuntu-latest
@@ -28,5 +21,6 @@ jobs:
         with:
           ignore-compile: true
           target: 'src/'
+          solc-version: "0.8.11"
 #          node-version: 16
 #          sarif: results.sarif
