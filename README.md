@@ -31,8 +31,9 @@ Apps and people can support non-custodial lending by simply using `getVirtualOwn
 You need to have [Foundry](https://github.com/gakonst/foundry) installed.
 
 ### Steps
-1. Get dependencies and build contracts - `forge build`
-2. Run unit tests with fuzzing - `forge test`
+1. Install git submodules - `git submodule update --init --recursive`
+2. Get dependencies and build contracts - `forge build`
+3. Run unit tests with fuzzing - `forge test`
 
 ## Contracts
 ### LendWrapper.sol
