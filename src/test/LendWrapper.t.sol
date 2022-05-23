@@ -9,6 +9,7 @@ import "../../lib/solmate/src/test/utils/mocks/MockERC721.sol";
 interface CheatCodes {
     function prank(address) external;
     function startPrank(address) external;
+    function stopPrank() external;
     function warp(uint) external;
 }
 
@@ -91,6 +92,7 @@ contract LendWrapperTest is DSTest {
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assertEq(user1, lendWrapper.virtualOwnerOf(0));
 
+        cheats.stopPrank();
         cheats.prank(user1);
         lendWrapper.transferFrom(user1, user2, 0);
         assertEq(user2, lendWrapper.virtualOwnerOf(0));
@@ -138,6 +140,7 @@ contract LendWrapperTest is DSTest {
         lendWrapper.lendOut(0, user1, block.timestamp, nonZeroDuration);
         assert(!lendWrapper.canBeCollected(0));
 
+        cheats.stopPrank();
         cheats.prank(user1);
         lendWrapper.terminateLending(0);
 
